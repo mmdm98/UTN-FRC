@@ -46,8 +46,8 @@ img_cpy = copy.deepcopy(img)
 #guardo en array
 param = [img, img_cpy]
 #titulos
-cv2.imshow('Recortador de Imagenes: "k" para guardar recorte, "esc" para salir', param[1])
-cv2.setMouseCallback('Recortador de Imagenes: "k" para guardar recorte, "esc" para salir', drawNcut, param)
+cv2.imshow('Recortador de Imagenes: "g" para guardar, "esc" para salir', param[1])
+cv2.setMouseCallback('Recortador de Imagenes: "g" para guardar, "esc" para salir', drawNcut, param)
 #loop
 while (1):
     cv2.imshow('Recortador de Imagenes: "g" para guardar, "esc" para salir', param[1])

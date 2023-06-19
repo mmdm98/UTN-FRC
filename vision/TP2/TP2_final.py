@@ -4,7 +4,16 @@
 import numpy as np
 import cv2
 import copy
+from sys import argv
 
+if len(argv) >= 3:
+    #por si se quiere poner otra imagen, poner el path o ubicarla en el directorio
+    imagen_entrada1, imagen_entrada2 = argv[1], argv[2]
+else:
+    #imagen por default
+    imagen_entrada1, imagen_entrada2 = 'slipknot.jpg', 'logo.jpg'
+
+#colores
 blue = (255, 0, 0); green = (0, 255, 0); red = (0, 0, 255)
 H, W = 512, 512   #alto y ancho por defecto
 count  = 0        #contador de circulos en 0
@@ -39,35 +48,32 @@ def draw3dots(event, x, y, flags, param):
 
 def overlay(warp, original):
     rows, cols, channels = original.shape #toma filas, columnas y canales(png) de la original(que es la copia xd)
-    #roi = warp[0:rows, 0:cols ]           #area de interes en la warpeada, o sea toda (si pongo otra roi, se muere)
-                                          #si o si el area tiene que ser del mismo tamaño para sumar despues
     img2gray = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY)                #escala en grises     
     ret, mask = cv2.threshold(img2gray, 1, 255, cv2.THRESH_BINARY)  #treshold para binarizar en blanco o negro (1 o 0 resp)
     mask_not = cv2.bitwise_not(mask)                                #mascara de 1s
     img1_bg = cv2.bitwise_and(warp, warp, mask = mask)              #lo que entiendo, agarra el area de la warp hace and con la mask de 0s
     img2_fg = cv2.bitwise_and(original, original, mask = mask_not)  #hace and con la original y la mascara de unos
     dst = cv2.add(img1_bg, img2_fg)                                 #suma
-    #warp[0:rows, 0:cols ] = dst                                    #sinceramente no se que hace esto
     cv2.imencode('.jpg', dst)[1].tofile('bastaaa.jpg')              #guardo la nueva porque si
-    cv2.imshow('dst', dst)                                          #la muestroo
+    cv2.imshow('Imagenes fusionadas', dst)                          #la muestroo
 
 #captura y redimension de imagenes 
-img_orig = cv2.resize((cv2.imread('slipknot.jpg')), (H, W))
-img_aux  = cv2.resize((cv2.imread('logo.jpg')), (H, W))
+img_orig = cv2.resize((cv2.imread(imagen_entrada1)), (H, W))
+img_aux  = cv2.resize((cv2.imread(imagen_entrada2)), (H, W))
 
 #copio la original y la guardo
 img_copy = copy.deepcopy(img_orig)
 param = [img_orig, img_copy] #creo un paquete en donde guardar una original y una copia
 
 #muestro en pantalla
-cv2.imshow('Imagen dos', img_aux)
-cv2.imshow('Marcar 3 Puntos', param[1])
+cv2.imshow('Imagen a fusionar', img_aux)
+cv2.imshow('Marcar 3 Puntos y apretar "g"', param[1])
 #activo callback y le paso la funcion + la original y la copia || preguntar porque anda acá y no necesariamente en el while*
-cv2.setMouseCallback('Marcar 3 Puntos', draw3dots, param)
+cv2.setMouseCallback('Marcar 3 Puntos y apretar "g"', draw3dots, param)
 
 #loop
 while (1):
-    cv2.imshow('Marcar 3 Puntos', param[1])                             #siempre muestro la copia, en donde trabajo
+    cv2.imshow('Marcar 3 Puntos y apretar "g"', param[1])                             #siempre muestro la copia, en donde trabajo
     k = cv2.waitKey(1) & 0xFF                                           #cosas de teclado
     if k == ord('g'):                                                   #ord es para que agarre bien
         points2 = np.array([[0, 0], [img_aux.shape[1],0], [0, img_aux.shape[1]]]).astype(np.float32)  #guardo tres puntos (float) de la img_aux
