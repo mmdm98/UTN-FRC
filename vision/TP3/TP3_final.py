@@ -46,27 +46,6 @@ def draw4dots(event, x, y, flags, param):
         cv2.circle(param[1], (x, y), 4, red, -1) #dibuja circulos
         count = count + 1                        #contador de circulos
 
-#funcion que hace el overlay entre las dos imagenes
-
-#Bueno, escala en grises de la original, hace dos mascaras a partir de una binarizacion, guarda la mascara de 0s por un lado y la de 1s por otro
-#despues hace una and entre la warp y ella misma, en la mascara que predominan 0s(o sea negros), todo lo negro va a quedar igual, solo cambia en
-#donde tenga un 1(blanco), cabe destacar que la operacion es bitwise en 8 bits por pixel. Lo mismo pasa con la imagen original, pero se usa la 
-#mascara de 1s, entonces en donde tenga blanco en la mascara, voy a ver mi imagen original, y en donde tenga negro se queda negro. Al final se
-#suman las dos, es como si en una trabajara los blancos, y en otra los negros, al sumar: en donde tenia negro voy a tener el blanco y en donde
-#tenia blanco voy a tener el negro. En otras palabras, estoy por hacer galletas, corto un cuadrado de masa con dos moldes complementarios, 
-#decoro cada galleta, y despues las uno en el cuadrado original. 
-
-def overlay(warp, original):
-    rows, cols, channels = original.shape #toma filas, columnas y canales(png) de la original(que es la copia xd)
-    img2gray = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY)                #escala en grises     
-    ret, mask = cv2.threshold(img2gray, 1, 255, cv2.THRESH_BINARY)  #treshold para binarizar en blanco o negro (1 o 0 resp)
-    mask_not = cv2.bitwise_not(mask)                                #mascara de 1s
-    img1_bg = cv2.bitwise_and(warp, warp, mask = mask)              #lo que entiendo, agarra el area de la warp hace and con la mask de 0s
-    img2_fg = cv2.bitwise_and(original, original, mask = mask_not)  #hace and con la original y la mascara de unos
-    dst = cv2.add(img1_bg, img2_fg)                                 #suma
-    cv2.imencode('.jpg', dst)[1].tofile('bastaaa.jpg')              #guardo la nueva porque si
-    cv2.imshow('Imagen rectificada', dst)                           #la muestroo
-
 #captura y redimension de imagenes 
 img_orig = cv2.resize((cv2.imread(imagen_entrada1)), (H, W))
 
@@ -87,7 +66,8 @@ while (1):
         points2 = np.array([[0, 0], [img_orig.shape[1], 0], [0, img_orig.shape[1]], [img_orig.shape[0], img_orig.shape[1]]]).astype(np.float32)  #guardo cuatro puntos (float) de la img_aux
         warp_mat = cv2.getPerspectiveTransform(points, points2)  #se obtiene matriz que deforma de los cuatro puntos de img_aux, a los cuatro puntos click
         warp_dst = cv2.warpPerspective(param[1], warp_mat, (H,W)) #aplico la transformada afin a la img_aux y la muestro
-        cv2.imshow('warpeada', warp_dst)
+        cv2.imshow('Imagen Rectificada', warp_dst)
+        cv2.imwrite('dst.jpg', warp_dst)   
         param[1] = copy.deepcopy(param[0]) #reestablezco copia a original
     elif k == 27: #sale con escape
         break
